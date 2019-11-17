@@ -9,11 +9,24 @@ __all__ = ["launchimage"]
 
 import sh
 import json
+from PIL import Image
 from os.path import join, exists
 from os import makedirs
 
 appicon_json = {
   "images" : [
+    {
+      "idiom" : "iphone",
+      "size" : "20x20",
+      "scale" : "2x",
+      "filename": "Icon40.png"
+    },
+    {
+      "idiom" : "iphone",
+      "size" : "20x20",
+      "scale" : "3x",
+      "filename": "Icon60.png"
+    },
     {
       "size" : "29x29",
       "idiom" : "iphone",
@@ -67,6 +80,18 @@ appicon_json = {
       "idiom" : "iphone",
       "filename" : "Icon180.png",
       "scale" : "3x"
+    },
+    {
+      "idiom" : "ipad",
+      "size" : "20x20",
+      "filename" : "Icon20.png",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "ipad",
+      "size" : "20x20",
+      "filename" : "Icon40.png",
+      "scale" : "2x"
     },
     {
       "size" : "29x29",
@@ -192,12 +217,36 @@ appicon_json = {
       "subtype" : "38mm"
     },
     {
+      "size" : "44x44",
+      "idiom" : "watch",
+      "scale" : "2x",
+      "filename" : "Icon88.png",
+      "role" : "appLauncher",
+      "subtype" : "40mm"
+    },
+    {
+      "size" : "50x50",
+      "idiom" : "watch",
+      "scale" : "2x",
+      "filename" : "Icon100.png",
+      "role" : "appLauncher",
+      "subtype" : "44mm"
+    },
+    {
       "size" : "98x98",
       "idiom" : "watch",
       "scale" : "2x",
       "filename" : "Icon196.png",
       "role" : "quickLook",
       "subtype" : "42mm"
+    },
+    {
+      "size" : "108x108",
+      "idiom" : "watch",
+      "scale" : "2x",
+      "filename" : "Icon216.png",
+      "role" : "quickLook",
+      "subtype" : "44mm"
     },
     {
       "size" : "16x16",
@@ -264,7 +313,19 @@ appicon_json = {
       "idiom": "ipad",
       "filename": "Icon167.png",
       "scale": "2x"
-    }
+    },
+    {
+      "idiom" : "ios-marketing",
+      "size" : "1024x1024",
+      "scale" : "1x",
+      "filename": "Icon1024.png"
+    },
+    {
+      "idiom" : "watch-marketing",
+      "size" : "1024x1024",
+      "scale" : "1x",
+      "filename": "Icon1024.png"
+    },
   ],
   "info" : {
     "version" : 1,
@@ -403,7 +464,7 @@ launchimage_json = {
       "extent" : "full-screen",
       "filename" : "Default2048x1536.png",
       "scale" : "2x"
-    }
+    },
   ],
   "info" : {
     "version" : 1,
@@ -430,6 +491,11 @@ def icon(image_xcassets, image_fn):
         ("58", None, "Icon58.png"),
         ("29", "Icon58.png", "Icon29.png"),
 
+        # iPhone notification
+        # 20pt - 2x,3x
+        # ("40", None, "Icon40.png"),
+        ("60", None, "Icon60.png"),
+
         # iPhone
         # Spotlight - iOS 7-8
         # 40pt 2x,3x
@@ -448,6 +514,11 @@ def icon(image_xcassets, image_fn):
         ("180", None, "Icon180.png"),
         #("120", None, "Icon120.png # duplicate"),
 
+        # iPad
+        # Notifications
+        # 20pt 1x,2x
+        ("20", "Icon80.png", "Icon20.png"),
+        ("40", "Icon80.png", "Icon40.png"),
 
         # iPad
         # Settings iOS 5-8
@@ -513,9 +584,10 @@ def icon(image_xcassets, image_fn):
 
         # Apple Watch
         # Short Look
-        # 38mm, 42mm
+        # 38mm, 42mm, 44mm
         ("172", None, "Icon172.png"),
         ("196", None, "Icon196.png"),
+        ("216", None, "Icon216.png"),
 
 
         # OS X
@@ -560,48 +632,66 @@ def launchimage(image_xcassets, image_fn):
         # iPhone 3.5" @2x
         ("640 960", None, "Default640x960.png"),
         # iPhone 3.5" @1x
-        ("320 480", "Default640x960.png", "Default320x480.png"),
+        ("320 480", None, "Default320x480.png"),
         # iPhone 4.0" @2x
         ("640 1136", None, "Default640x1136.png"),
         # iPhone 5.5" @3x - landscape
         ("2208 1242", None, "Default2208x1242.png"),
         # iPhone 5.5" @3x - portrait
-        ("1242 2208", "Default2208x1242.png", "Default1242x2208.png"),
+        ("1242 2208", None, "Default1242x2208.png"),
         # iPhone 4.7" @2x
         ("750 1334", None, "Default750x1334.png"),
         # iPad @2x - landscape
         ("2048 1536", None, "Default2048x1536.png"),
         # iPad @2x - portrait
-        ("1536 2048", "Default2048x1536.png", "Default1536x2048.png"),
+        ("1536 2048", None, "Default1536x2048.png"),
         # iPad @1x - landscape
-        ("1024 768", "Default2048x1536.png", "Default1024x768.png"),
+        ("1024 768", None, "Default1024x768.png"),
         # iPad @1x - portrait
-        ("768 1024", "Default1024x768.png", "Default768x1024.png"),
+        ("768 1024", None, "Default768x1024.png"),
     )
 
     _generate("LaunchImage.launchimage", image_xcassets, image_fn, options)
 
 
+def _buildimage(in_fn, out_fn, size, padcolor=None):
+    im = Image.open(in_fn)
+
+    # read the first left/bottom pixel
+    bgcolor = im.getpixel((0, 0))
+
+    # ensure the image fit in the destination size
+    if im.size[0] > size[0] or im.size[1] > size[1]:
+      f = max(im.size[0] / size[0], im.size[1] / size[1])
+      newsize = int(im.size[0] / f), int(im.size[1] / f)
+      im = im.resize(newsize)
+
+    # create final image
+    outim = Image.new("RGB", size, bgcolor[:3])
+    x = (size[0] - im.size[0]) // 2
+    y = (size[1] - im.size[1]) // 2
+    outim.paste(im, (x, y))
+
+    # save the image
+    outim.save(out_fn)
+
+
 def _generate(d, image_xcassets, image_fn, options, icon=False):
     for c, in_fn, out_fn in options:
         args = []
+        if in_fn is not None:
+            filename = join(image_xcassets, d, in_fn)
+        else:
+            filename = image_fn
+
         if icon:
             args += ["-Z", c]
+            args += [
+                "--out",
+                join(image_xcassets, d, out_fn)
+            ]
+            print("sips", " ".join(args))
+            sh.sips(*args)
         else:
-            # ensure one side will not be bigger than the other (ie, the image will
-            # fit to the screen)
-            args += ["-Z", str(min(map(int, c.split())))]
-            # if there is any left pixel, cover in black.
-            args += ["-p"] + c.split()
-            # and crop the image in necessary.
-            args += ["-c"] + c.split()[::-1]
-        if in_fn is not None:
-            args += [join(image_xcassets, d, in_fn)]
-        else:
-            args += [image_fn]
-        args += [
-            "--out",
-            join(image_xcassets, d, out_fn)
-        ]
-        print "sips", " ".join(args)
-        sh.sips(*args)
+            size = [int(x) for x in c.split()]
+            _buildimage(filename, join(image_xcassets, d, out_fn), size)

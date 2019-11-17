@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
 
     // Special environment to prefer .pyo, and don't write bytecode if .py are found
     // because the process will not have a write attribute on the device.
+    putenv("PYTHONOPTIMIZE=2");
     putenv("PYTHONDONTWRITEBYTECODE=1");
     putenv("PYTHONNOUSERSITE=1");
     putenv("PYTHONPATH=.");
@@ -38,7 +39,7 @@ int main(int argc, char *argv[]) {
     putenv("KIVY_NO_CONFIG=1");
     putenv("KIVY_NO_FILELOG=1");
     putenv("KIVY_WINDOW=sdl2");
-    putenv("KIVY_IMAGE=imageio,tex");
+    putenv("KIVY_IMAGE=imageio,tex,gif");
     putenv("KIVY_AUDIO=sdl2");
     putenv("KIVY_GL_BACKEND=sdl2");
     #ifndef DEBUG
@@ -56,7 +57,7 @@ int main(int argc, char *argv[]) {
     NSString *python_home = [NSString stringWithFormat:@"PYTHONHOME=%@", resourcePath, nil];
     putenv((char *)[python_home UTF8String]);
 
-    NSString *python_path = [NSString stringWithFormat:@"PYTHONPATH=%@:%@/lib/python3.7/:%@/lib/python3.7/site-packages", resourcePath, resourcePath, resourcePath, nil];
+    NSString *python_path = [NSString stringWithFormat:@"PYTHONPATH=%@:%@/lib/python3.7/:%@/lib/python3.7/site-packages:.", resourcePath, resourcePath, resourcePath, nil];
     putenv((char *)[python_path UTF8String]);
 
     NSString *tmp_path = [NSString stringWithFormat:@"TMP=%@/tmp", resourcePath, nil];
@@ -155,6 +156,9 @@ void load_custom_builtin_importer() {
         "    import _imp\n" \
         "    EXTS = _imp.extension_suffixes()\n" \
         "    sys.modules['subprocess'] = types.ModuleType(name='subprocess')\n" \
+        "    sys.modules['subprocess'].PIPE = None\n" \
+        "    sys.modules['subprocess'].STDOUT = None\n" \
+        "    sys.modules['subprocess'].DEVNULL = None\n" \
         "except ImportError:\n" \
         "    EXTS = ['.so']\n"
         "# Fake redirection to supress console output\n" \
@@ -187,7 +191,7 @@ void load_custom_builtin_importer() {
         "            try:\n" \
         "                mod = imp.load_dynamic(f, f)\n" \
         "            except ImportError:\n" \
-        "                import traceback; traceback.print_exc();\n" \
+        "                # import traceback; traceback.print_exc();\n" \
         "                # print('LOAD DYNAMIC FALLBACK', fullname)\n" \
         "                mod = imp.load_dynamic(fullname, fullname)\n" \
         "            sys.modules[fullname] = mod\n" \
