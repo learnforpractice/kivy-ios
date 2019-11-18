@@ -9,7 +9,7 @@ import os
 class PycryptoRecipe(CythonRecipe):
     version = "2.6.1"
     url = "https://ftp.dlitz.net/pub/dlitz/crypto/pycrypto/pycrypto-{version}.tar.gz"
-    depends = ["python", "openssl"]
+    depends = ["python3", "openssl", "mpir"]
     include_per_arch = True
     library="libpycrypto.a"
 
@@ -37,8 +37,8 @@ class PycryptoRecipe(CythonRecipe):
         os.chdir(build_dir)
         hostpython = sh.Command(self.ctx.hostpython)
         build_env = arch.get_env()
-        dest_dir = join(self.ctx.dist_dir, "root", "python")
-        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
+        dest_dir = join(self.ctx.dist_dir, "root", "python3")
+        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python3.7', 'site-packages')
         shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
 
 recipe = PycryptoRecipe()

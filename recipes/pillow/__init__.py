@@ -34,7 +34,8 @@ class PillowRecipe(Recipe):
         build_env = self.get_pil_env(arch)
         hostpython3 = sh.Command(self.ctx.hostpython)
         shprint(hostpython3, "setup.py", "build_ext", "--disable-tiff",
-            "--disable-webp", "-g", _env=build_env)
+            "--disable-webp", "--disable-lcms", "--disable-webpmux", 
+            "--disable-jpeg2000", "--disable-imagequant", "-g", _env=build_env)
         self.biglink()
 
     def install(self):

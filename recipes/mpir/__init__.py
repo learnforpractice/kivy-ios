@@ -12,6 +12,7 @@ class MpirRecipe(Recipe):
         ("build/gmp.h", ""),
         ("build/mpir.h", "")
         ]
+
     def prebuild_arch(self, arch):
         # common to all archs
         if  self.has_marker("patched"):
