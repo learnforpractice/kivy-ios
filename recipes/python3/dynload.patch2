@@ -1,0 +1,21 @@
+--- Python-3.7.1/Python/dynload_shlib.c
++++ Python-3.7.1/Python//dynload_shlib.c
+@@ -51,6 +51,8 @@ static struct {
+ } handles[128];
+ static int nhandles = 0;
+ 
++typedef void* (*fnPyIos_GetLoadFun)(const char* funcname);
++fnPyIos_GetLoadFun PyIos_GetLoadFun = 0;
+ 
+ dl_funcptr
+ _PyImport_FindSharedFuncptr(const char *prefix,
+@@ -78,6 +80,9 @@ _PyImport_FindSharedFuncptr(const char *prefix,
+      * of trying to dlopen, directly do the dlsym.
+      * -- Mathieu
+      */
++    if (PyIos_GetLoadFun) {
++       return (dl_funcptr)PyIos_GetLoadFun(funcname);
++    }
+     return (dl_funcptr) dlsym(RTLD_SELF, funcname);
+ 
+ #if 0

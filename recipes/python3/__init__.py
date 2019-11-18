@@ -28,6 +28,7 @@ class Python3Recipe(Recipe):
         if  self.has_marker("patched"):
             return
         self.apply_patch("dynload.patch")
+        self.apply_patch("dynload.patch2")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
         self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
         self.apply_patch("xcompile.patch")

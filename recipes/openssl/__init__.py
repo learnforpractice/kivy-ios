@@ -10,8 +10,10 @@ arch_mapper = {'i386': 'darwin-i386-cc',
 
 
 class OpensslRecipe(Recipe):
-    version = "1.0.2k"
-    url = "http://www.openssl.org/source/openssl-{version}.tar.gz"
+#    version = "1.0.2k"
+#    url = "http://www.openssl.org/source/openssl-{version}.tar.gz"
+    version = '1.1.1'
+    url = 'https://www.openssl.org/source/openssl-{version}.tar.gz'
     libraries = ["libssl.a", "libcrypto.a"]
     include_dir = "include"
     include_per_arch = True
@@ -28,6 +30,7 @@ class OpensslRecipe(Recipe):
             "-O3"
         )
         build_env = arch.get_env()
+        build_env["C_INCLUDE_PATH"] = join(arch.sysroot, "usr", "include")
         target = arch_mapper[arch.arch]
         shprint(sh.env, _env=build_env)
         sh.perl(join(self.build_dir, "Configure"),
@@ -43,6 +46,6 @@ class OpensslRecipe(Recipe):
             sh.sed("-ie", "s!^CFLAG=!CFLAG={} !".format(build_env['CFLAGS']),
                    "Makefile")
         shprint(sh.make, "clean")
-        shprint(sh.make, self.ctx.concurrent_make, "build_libs")
+        shprint(sh.make, self.ctx.concurrent_make, "build_libs", _env=build_env)
 
 recipe = OpensslRecipe()
