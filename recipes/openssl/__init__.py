@@ -25,6 +25,7 @@ class OpensslRecipe(Recipe):
             "-D_REENTRANT",
             "-DDSO_DLFCN",
             "-DHAVE_DLFCN_H",
+            "-DOPENSSL_NO_ASYNC",
             "-fomit-frame-pointer",
             "-fno-common",
             "-O3"
@@ -33,7 +34,7 @@ class OpensslRecipe(Recipe):
         build_env["C_INCLUDE_PATH"] = join(arch.sysroot, "usr", "include")
         target = arch_mapper[arch.arch]
         shprint(sh.env, _env=build_env)
-        sh.perl(join(self.build_dir, "Configure"),
+        sh.perl(join(self.build_dir, "Configure"), "-DOPENSSL_NO_ASYNC",
                 target,
                 _env=build_env)
         if target == 'iphoneos-cross':
