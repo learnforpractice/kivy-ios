@@ -3,7 +3,7 @@ from toolchain import PythonRecipe, shprint
 from os.path import join
 import sh, os
 
-class WerkzeugRecipe(PythonRecipe):
+class WebsocketsRecipe(PythonRecipe):
     version = "8.1"
     url = "https://github.com/aaugustin/websockets/archive/{version}.zip"
     depends = ["python3"]
@@ -18,5 +18,5 @@ class WerkzeugRecipe(PythonRecipe):
         build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python3.7', 'site-packages')
         shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
 
-recipe = WerkzeugRecipe()
+recipe = WebsocketsRecipe()
 
